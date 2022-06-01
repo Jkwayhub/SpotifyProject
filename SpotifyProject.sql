@@ -1,0 +1,75 @@
+-- Create a new table called '[Spotify]' in schema '[dbo]'
+-- Drop the table if it already exists
+IF OBJECT_ID('[dbo].[Spotify]', 'U') IS NOT NULL
+DROP TABLE [dbo].[Spotify]
+GO
+-- Create the table in the specified schema
+CREATE TABLE [dbo].[Spotify]
+(
+    [Id] INT NOT NULL PRIMARY KEY, -- Primary Key column
+    [ColumnName2] NVARCHAR(50) NOT NULL,
+    [ColumnName3] NVARCHAR(50) NOT NULL
+    -- Specify more columns here
+);
+GO
+--  SET OUT ASKING THE QUESTION OF WHICH ARTISTS WERE QUITE SUCCESSFUL WHERE THE MUSIC HAD HIGH AMOUNTS OF DANCABILITY
+select artist, year_released, dance 
+FROM spotifyhundred
+WHERE dance >80
+ORDER BY artist
+
+-- I NOTICED FROM MY RESULTS THAT BEYONCE HAD A SPECIAL CHARACTER, SO I UPDATED THE TABLE WITH A MORE READABLE NAME
+UPDATE spotifyhundred 
+SET artist = 'Beyonce'
+WHERE artist LIKE 'Beyo%'
+
+-- CHECKED THAT MY UPDATE WORKED SUCCESSFULLY
+SELECT artist 
+from spotifyhundred
+WHERE artist='Beyonce'
+
+-- I WAS QUITE A BIG FAN OF BANDS AND GROUPS WHEN I WAS YOUNGER, SO I WANTED TO FIND OUT HOW FREQUENTLY THEY HIT TOP 100 DURING MY CHILDHOOD
+
+SELECT * FROM spotifyhundred
+
+SELECT COUNT(artist_type) AS [total band/groups]
+FROM spotifyhundred
+
+SELECT COUNT(artist_type) AS [band/group hits]
+FROM spotifyhundred
+WHERE artist_type='Band/Group' AND top_year BETWEEN 2010 AND 2016 -- 141 BANDS/GROUPS APPEARED IN THE TOP 100 WITHIN THIS RANGE, QUITE POPULAR!
+
+
+-- LOOKING DEEPER INTO THE DATA, I WANTED TO FIND THE AVERAGE DURATION OF SONGS WHICH ENTERED THE CHARTS
+
+SELECT AVG(duration) AS averageduration
+FROM spotifyhundred -- THIS GAVE ME A FIGURE IN M/S, BUT I WANTED THIS CONVERTED TO MINUTES
+
+-- FIRST I HAD TO CREATE A FUNCTION TO CONVERT THE AVERAGE TIME FROM SECONDS, TO MINUTES
+CREATE FUNCTION dbo.TimeSpan
+(
+    @Hours int,
+    @Minutes int,
+    @Seconds int
+)
+RETURNS datetime
+AS BEGIN
+    RETURN DATEADD(SS, @Hours * 3600 + @Minutes * 60 + @Seconds, 0)
+END
+
+-- AFTER CONVERTING, I ENTERED THIS CODE TO BRING FORWARD THE AVERAGE SONG TIME IN MINUTES
+
+SELECT SUBSTRING(CONVERT(char(8), dbo.TimeSpan(0, 0, 220), 108), 4, 5) AS averageduration
+
+-- I WAS THEN INTERESTED TO KNOW WHO THE MOST POPULAR ARTISTS WERE, AND HOW MANY TIMES THEY ENTERED THE TOP 100 LIST
+
+SELECT * FROM spotifyhundred
+ORDER BY artist ASC -- STARTED OUT ORDERING THE ARTISTS BY NAME, THIS WILL BE USEFUL WHEN WE START VISUALISING THE DATA
+
+
+
+SELECT TOP 10 [artist], COUNT([artist]) as yearsfrequency
+FROM [dbo].[spotifyhundred]
+GROUP BY [artist]
+ORDER BY yearsfrequency desc -- THIS CODE RETURNED THE TOP 10 ENTERING ARTISTS
+
